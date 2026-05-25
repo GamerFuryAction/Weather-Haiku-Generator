@@ -1,0 +1,25 @@
+{
+  "name": "weather-haiku-generator",
+  "version": "1.0.0",
+  "description": "A website that generates a unique haiku every time you visit, based on the current weather in your city using a free API — like sunny days = lighthearted haikus, rain = melancholy ones.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GamerFuryAction/Weather-Haiku-Generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/GamerFuryAction/Weather-Haiku-Generator/issues"
+  },
+  "homepage": "https://github.com/GamerFuryAction/Weather-Haiku-Generator#readme",
+  "devDependencies": {
+    "vite": "^8.0.14"
+  }
+}
