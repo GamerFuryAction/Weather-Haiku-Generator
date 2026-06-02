@@ -3,18 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Haiku App (NPM)</title>
+    <title>Weather Haiku App</title>
     <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
 
     <div class="container">
         <div class="location" id="location-text">Detecting your sky...</div>
+        
         <div class="haiku" id="haiku-text">
             Loading words from clouds,
             Waiting for the wind to blow,
             Just a brief moment...
         </div>
+
+        <div class="weather-info" id="weather-info" style="display: none;">
+            <div class="stat-box">
+                <span class="stat-label">Temp</span>
+                <span class="stat-value" id="temp-val">--</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Wind</span>
+                <span class="stat-value" id="wind-val">--</span>
+            </div>
+            <div class="stat-box wide-box">
+                <span class="stat-label">Feels</span>
+                <span class="stat-value" id="desc-val">--</span>
+            </div>
+        </div>
+
         <button id="refresh-btn">Refresh Sky</button>
     </div>
 

@@ -1,4 +1,3 @@
-// 1. Haiku Data
 const haikuLibrary = {
     sunny: [
         "Golden beams of light,\nShadows dance upon the grass,\nWarmth hugs everything.",
@@ -21,69 +20,115 @@ const haikuLibrary = {
     ]
 };
 
+const weatherDescriptions = {
+    0: "Clear",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Foggy",
+    48: "Rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    56: "Freezing drizzle",
+    57: "Freezing drizzle",
+    61: "Light rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    66: "Freezing rain",
+    67: "Freezing rain",
+    71: "Light snow",
+    73: "Moderate snow",
+    75: "Heavy snow",
+    77: "Snow grains",
+    80: "Rain showers",
+    81: "Heavy showers",
+    82: "Violent showers",
+    85: "Snow showers",
+    86: "Heavy snow showers",
+    95: "Thunderstorm",
+    96: "Stormy",
+    99: "Stormy"
+};
+
 function getRandomHaiku(weatherType) {
     const list = haikuLibrary[weatherType] || haikuLibrary.default;
     const randomIndex = Math.floor(Math.random() * list.length);
     return list[randomIndex];
 }
 
-// 2. Fetching Data
-function getWeather() {
-    document.getElementById('haiku-text').innerText = "Consulting the stars...\n(via npm & Vite!)";
-    
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            
-            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
-                .then(response => response.json())
-                .then(data => {
-                    interpretWeather(data.current_weather.weathercode);
-                })
-                .catch(() => {
-                    document.getElementById('haiku-text').innerText = "The clouds blocked the data.\nTry refreshing again!";
-                });
-        },
-        () => {
-            document.getElementById('location-text').innerText = "Location Denied";
-            document.getElementById('haiku-text').innerText = "Can't see your code,\nTell me where you are living,\nOr enjoy this prompt.";
-        }
-    );
+function degToCompass(deg) {
+    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return directions[Math.round(deg / 45) % 8];
 }
 
-// 3. Update the UI
 function interpretWeather(code) {
     let type = 'default';
     let bgGradient = "linear-gradient(to bottom, #e0eafc, #cfdef3)";
-    
+    let mood = "Mysterious Sky";
+
     if (code === 0 || code === 1) {
         type = 'sunny';
-        bgGradient = "linear-gradient(to bottom, #fffc00, #ff851b)";
-        document.getElementById('location-text').innerText = "Bright Skies";
+        bgGradient = "linear-gradient(to bottom, #fff200, #ff6f61)";
+        mood = "Sunshine Mode";
     } else if (code === 2 || code === 3) {
         type = 'cloudy';
-        bgGradient = "linear-gradient(to bottom, #bdc3c7, #2c3e50)";
-        document.getElementById('location-text').innerText = "Overcast Sky";
+        bgGradient = "linear-gradient(to bottom, #98a8c4, #4f5d75)";
+        mood = "Cloudy Vibes";
     } else if (code >= 51 && code <= 67) {
         type = 'rainy';
-        bgGradient = "linear-gradient(to bottom, #61a0a3, #3b5998)";
-        document.getElementById('location-text').innerText = "Rain Falling";
+        bgGradient = "linear-gradient(to bottom, #6db4ff, #2a4d69)";
+        mood = "Rainy Mood";
     } else if (code >= 71 && code <= 86) {
         type = 'snowy';
-        bgGradient = "linear-gradient(to bottom, #e6dada, #274046)";
-        document.getElementById('location-text').innerText = "Frozen Sky";
-    } else {
-        type = 'default';
-        document.getElementById('location-text').innerText = "Mysterious Weather";
+        bgGradient = "linear-gradient(to bottom, #dbe7ff, #4d648d)";
+        mood = "Snowflake Time";
     }
 
-    document.body.style.background = bgGradient;
-    document.getElementById('haiku-text').innerText = getRandomHaiku(type);
+    return { type, bgGradient, mood };
 }
 
-// 4. Setup Event Listeners
-document.getElementById('refresh-btn').addEventListener('click', getWeather);
+function updateWeatherUI(weather) {
+    const desc = weatherDescriptions[weather.weathercode] || 'Mystery Weather';
+    const details = interpretWeather(weather.weathercode);
+    document.body.style.background = details.bgGradient;
+    document.getElementById('location-text').innerText = `${desc} · ${details.mood}`;
+    document.getElementById('haiku-text').innerText = getRandomHaiku(details.type);
+    document.getElementById('temp-val').innerText = `${Math.round(weather.temperature)}°C`;
+    document.getElementById('wind-val').innerText = `${Math.round(weather.windspeed)} km/h ${degToCompass(weather.winddirection)}`;
+    document.getElementById('desc-val').innerText = desc;
+    document.getElementById('weather-info').style.display = 'grid';
+}
 
-// Run automatically on load
+function getWeather() {
+    document.getElementById('location-text').innerText = 'Looking up your sky...';
+    document.getElementById('haiku-text').innerText = 'Wait up, chill weather is loading...';
+    document.getElementById('weather-info').style.display = 'none';
+
+    if (!navigator.geolocation) {
+        document.getElementById('location-text').innerText = 'Geolocation not ready';
+        document.getElementById('haiku-text').innerText = 'No location access, so no sky show.';
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+            .then(response => response.json())
+            .then(data => {
+                updateWeatherUI(data.current_weather);
+            })
+            .catch(() => {
+                document.getElementById('location-text').innerText = 'Data glitch';
+                document.getElementById('haiku-text').innerText = 'The weather API is on break. Try again soon.';
+            });
+    }, () => {
+        document.getElementById('location-text').innerText = 'Location Denied';
+        document.getElementById('haiku-text').innerText = 'Can’t see your location, but good vibes still count.';
+    });
+}
+
+document.getElementById('refresh-btn').addEventListener('click', getWeather);
 getWeather();
